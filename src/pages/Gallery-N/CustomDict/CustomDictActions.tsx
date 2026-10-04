@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import type { Dictionary } from '@/typings'
 import type { ICustomDict } from '@/utils/db/custom-dict'
 import { deleteCustomDict, getCustomDict } from '@/utils/db/custom-dict'
-import type { MouseEvent } from 'react'
 import { useCallback, useState } from 'react'
 import IconPencil from '~icons/tabler/pencil'
 import IconTrash from '~icons/tabler/trash'
@@ -20,21 +19,15 @@ export default function CustomDictActions({ dictionary, isSelected }: CustomDict
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const onClickEdit = useCallback(
-    async (e: MouseEvent) => {
-      // 阻止冒泡到卡片，避免同时弹出词库详情
-      e.stopPropagation()
-      const dict = await getCustomDict(dictionary.id)
-      if (!dict) return
+  const onClickEdit = useCallback(async () => {
+    const dict = await getCustomDict(dictionary.id)
+    if (!dict) return
 
-      setEditingDict(dict)
-      setIsEditDialogOpen(true)
-    },
-    [dictionary.id],
-  )
+    setEditingDict(dict)
+    setIsEditDialogOpen(true)
+  }, [dictionary.id])
 
-  const onClickDelete = useCallback((e: MouseEvent) => {
-    e.stopPropagation()
+  const onClickDelete = useCallback(() => {
     setIsDeleteDialogOpen(true)
   }, [])
 
@@ -55,7 +48,9 @@ export default function CustomDictActions({ dictionary, isSelected }: CustomDict
   }`
 
   return (
-    <div className="absolute right-0 top-0 flex items-center gap-1">
+    // 整个卡片是词库详情弹窗的 trigger，而 portal 里的事件会沿组件树冒泡到这里，
+    // 所以在此统一截断，否则点按钮或在弹窗里操作都会把详情弹窗一起打开
+    <div className="absolute right-0 top-0 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
       <button type="button" className={iconClassName} onClick={onClickEdit} title="编辑词库">
         <IconPencil className="h-4 w-4" />
       </button>
@@ -66,7 +61,7 @@ export default function CustomDictActions({ dictionary, isSelected }: CustomDict
       <CustomDictDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} editingDict={editingDict} />
 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="!rounded-[20px]" onClick={(e) => e.stopPropagation()}>
+        <DialogContent className="!rounded-[20px]">
           <DialogHeader>
             <DialogTitle className="text-gray-800 dark:text-gray-200">删除「{dictionary.name}」</DialogTitle>
             <DialogDescription>该词库的单词和练习记录都会被一并删除，且无法恢复。</DialogDescription>
