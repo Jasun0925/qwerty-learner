@@ -13,8 +13,15 @@ import { TypingContext, TypingStateActionType, initialState, typingReducer } fro
 import { DonateCard } from '@/components/DonateCard'
 import Header from '@/components/Header'
 import Tooltip from '@/components/Tooltip'
-import { idDictionaryMap } from '@/resources/dictionary'
-import { currentChapterAtom, currentDictIdAtom, isReviewModeAtom, randomConfigAtom, reviewModeInfoAtom } from '@/store'
+import {
+  currentChapterAtom,
+  currentDictIdAtom,
+  idDictionaryMapAtom,
+  isCustomDictionariesLoadedAtom,
+  isReviewModeAtom,
+  randomConfigAtom,
+  reviewModeInfoAtom,
+} from '@/store'
 import { IsDesktop, isLegal } from '@/utils'
 import { useSaveChapterRecord } from '@/utils/db'
 import { useMixPanelChapterLogUploader } from '@/utils/mixpanel'
@@ -30,6 +37,8 @@ const App: React.FC = () => {
 
   const [currentDictId, setCurrentDictId] = useAtom(currentDictIdAtom)
   const setCurrentChapter = useSetAtom(currentChapterAtom)
+  const idDictionaryMap = useAtomValue(idDictionaryMapAtom)
+  const isCustomDictionariesLoaded = useAtomValue(isCustomDictionariesLoadedAtom)
   const randomConfig = useAtomValue(randomConfigAtom)
   const chapterLogUploader = useMixPanelChapterLogUploader(state)
   const saveChapterRecord = useSaveChapterRecord()
@@ -50,13 +59,16 @@ const App: React.FC = () => {
 
   // 在组件挂载和currentDictId改变时，检查当前字典是否存在，如果不存在，则将其重置为默认值
   useEffect(() => {
+    // 自定义词库来自 IndexedDB，加载完成前无法判断词典是否真的不存在
+    if (!isCustomDictionariesLoaded) return
+
     const id = currentDictId
     if (!(id in idDictionaryMap)) {
       setCurrentDictId('cet4')
       setCurrentChapter(0)
       return
     }
-  }, [currentDictId, setCurrentChapter, setCurrentDictId])
+  }, [currentDictId, idDictionaryMap, isCustomDictionariesLoaded, setCurrentChapter, setCurrentDictId])
 
   const skipWord = useCallback(() => {
     dispatch({ type: TypingStateActionType.SKIP_WORD })

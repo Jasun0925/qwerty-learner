@@ -1,7 +1,8 @@
-import { idDictionaryMap } from '@/resources/dictionary'
+import { idDictionaryMapAtom } from '@/store'
 import { wordListFetcher } from '@/utils/wordListFetcher'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { saveAs } from 'file-saver'
+import { useAtomValue } from 'jotai'
 import type { FC } from 'react'
 import { useState } from 'react'
 import * as XLSX from 'xlsx'
@@ -12,6 +13,7 @@ type DropdownProps = {
 
 const DropdownExport: FC<DropdownProps> = ({ renderRecords }) => {
   const [isExporting, setIsExporting] = useState(false)
+  const idDictionaryMap = useAtomValue(idDictionaryMapAtom)
 
   const formatTimestamp = (date: any) => {
     const year = date.getFullYear()

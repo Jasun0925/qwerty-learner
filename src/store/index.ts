@@ -1,7 +1,7 @@
 import atomForConfig from './atomForConfig'
 import { reviewInfoAtom } from './reviewInfoAtom'
 import { DISMISS_START_CARD_DATE_KEY, defaultFontSizeConfig } from '@/constants'
-import { idDictionaryMap } from '@/resources/dictionary'
+import { dictionaries, idDictionaryMap } from '@/resources/dictionary'
 import { correctSoundResources, keySoundResources, wrongSoundResources } from '@/resources/soundResource'
 import type {
   Dictionary,
@@ -17,14 +17,22 @@ import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 
 export const currentDictIdAtom = atomWithStorage('currentDict', 'cet4')
+
+// 用户在本地创建的词库，启动时由 useSyncCustomDictionaries 从 IndexedDB 灌入
+export const customDictionariesAtom = atom<Dictionary[]>([])
+// 自定义词库是异步读出来的，加载完成前不能判定某个 dictId 不存在
+export const isCustomDictionariesLoadedAtom = atom(false)
+
+export const allDictionariesAtom = atom<Dictionary[]>((get) => [...dictionaries, ...get(customDictionariesAtom)])
+
+export const idDictionaryMapAtom = atom<Record<string, Dictionary>>((get) =>
+  Object.fromEntries(get(allDictionariesAtom).map((dict) => [dict.id, dict])),
+)
+
 export const currentDictInfoAtom = atom<Dictionary>((get) => {
   const id = get(currentDictIdAtom)
-  let dict = idDictionaryMap[id]
   // 如果 dict 不存在，则返回 cet4. Typing 中会检查 DictId 是否存在，如果不存在则会重置为 cet4
-  if (!dict) {
-    dict = idDictionaryMap.cet4
-  }
-  return dict
+  return get(idDictionaryMapAtom)[id] ?? idDictionaryMap.cet4
 })
 
 export const currentChapterAtom = atomWithStorage('currentChapter', 0)

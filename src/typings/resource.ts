@@ -28,6 +28,8 @@ export type Dictionary = {
   chapterCount: number
   //override default pronunciation when not undefined
   defaultPronIndex?: number
+  // 用户在本地创建的词库，数据存在 IndexedDB 而非 public/dicts
+  isCustom?: boolean
 }
 
 export type PronunciationConfig = {

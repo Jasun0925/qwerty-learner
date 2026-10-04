@@ -1,3 +1,4 @@
+import CustomDictActions from './CustomDict/CustomDictActions'
 import DictDetail from './DictDetail'
 import { useDictStats } from './hooks/useDictStats'
 import bookCover from '@/assets/book-cover.png'
@@ -79,7 +80,11 @@ export default function DictionaryComponent({ dictionary }: Props) {
                   />
                 </Progress.Root>
               )}
-              <img src={bookCover} className={`absolute right-3 top-3 w-16 ${isSelected ? 'opacity-50' : 'opacity-20'}`} />
+              {dictionary.isCustom ? (
+                <CustomDictActions dictionary={dictionary} isSelected={isSelected} />
+              ) : (
+                <img src={bookCover} className={`absolute right-3 top-3 w-16 ${isSelected ? 'opacity-50' : 'opacity-20'}`} />
+              )}
             </div>
           </div>
         </div>
